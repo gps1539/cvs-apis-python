@@ -49,7 +49,7 @@ if args.allocation:
 
 # check service level and word swap to match UI
 if args.service_level:
-	if (args.service_level)[0] not in ('standard' 'premium' 'extreme'):
+	if (args.service_level)[0] != 'standard' and (args.service_level)[0] != 'premium' and (args.service_level)[0] != 'extreme':
 		print('Service level must be standard, premium or extreme')
 		sys.exit(1)
 	else:
@@ -64,7 +64,7 @@ if args.export:
 	export = args.export[0]
 
 if args.rw_ro:
-	if (args.rw_ro)[0] not in ('ro' 'rw'):
+	if (args.rw_ro)[0] != 'ro' and (args.rw_ro)[0] != 'rw':
 		print('ro (read only) or rw (read write) must be provided')
 		sys.exit(1)
 	elif (args.rw_ro)[0] == 'ro':
@@ -78,7 +78,7 @@ else:
 	sys.exit(1)
 
 if args.region:
-	if (args.region)[0] not in ('us-east-1' 'us-west-1' 'us-west-2' 'eu-central-1' 'eu-west-1' 'eu-west-2' 'ap-northeast-1' 'ap-southeast-2'):
+	if (args.region)[0] != 'us-east-1' and (args.region)[0] != 'us-west-1' and (args.region)[0] != 'us-west-2' and (args.region)[0] != 'eu-central-1' and (args.region)[0] != 'eu-west1' and (args.region)[0] != 'eu-west-2' and (args.region)[0] != 'ap-northeast-1' and (args.region)[0] != 'ap-southeast-2':
 		print('Please select a supported region')
 		sys.exit(1)	
 else:
@@ -86,7 +86,7 @@ else:
 	sys.exit(1)
 
 if args.protocol:
-	if (args.protocol)[0] not in ('nfs3' 'smb' 'nfs3smb'):
+	if (args.protocol)[0] != 'nfs3' and (args.protocol)[0] !='smb' and (args.protocol)[0] != 'nfs3smb' :
 		print('Please choose nfs3, smb or nfs3smb (dual)')
 		sys.exit(1)
 	elif (args.protocol)[0] == 'nfs3':

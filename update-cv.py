@@ -42,7 +42,7 @@ if args.allocation:
 
 # word swap service levels to match UI
 if args.service_level:
-	if (args.service_level)[0] not in ('standard' 'premium' 'extreme'):
+	if (args.service_level)[0] != 'standard' and (args.service_level)[0] != 'premium' and (args.service_level)[0] != 'extreme':
 		print('Service level must be standard, premium or extreme')
 		sys.exit(1)
 	else:
