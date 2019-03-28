@@ -35,10 +35,18 @@ else:
 
 if args.mountpoint:
 	if len(args.mountpoint)!=1:
-		print('a volume mountpoint is require')
+		print('a parent mountpoint is required')
 		sys.exit(1)
 else:
-	print('a volume mountpoint is require')
+	print('a parent mountpoint is required')
+	sys.exit(1)
+
+if args.new_mountpoint:
+	if len(args.new_mountpoint)!=1:
+		print('a mountpoint is required for the clone')
+		sys.exit(1)
+else:
+	print('a mountpoint is required for the clone')
 	sys.exit(1)
 
 if args.allocation:
@@ -80,10 +88,10 @@ else:
 
 if args.region:
 	if (args.region)[0] != 'us-east-1' and (args.region)[0] != 'us-west-1' and (args.region)[0] != 'us-west-2' and (args.region)[0] != 'eu-central-1' and (args.region)[0] != 'eu-west1' and (args.region)[0] != 'eu-west-2' and (args.region)[0] != 'ap-northeast-1' and (args.region)[0] != 'ap-southeast-2':
-		print('Please select a supported region')
+		print('Please select an available region')
 		sys.exit(1)	
 else:
-	print('Please select a supported region')
+	print('Please select an available region')
 	sys.exit(1)
 
 if args.protocol:
@@ -168,7 +176,7 @@ data = {
 
 take_snap(fsid, url, data, head)
 
-#create volume from snapshot
+# create volume from snapshot
 def create(fsid, url, data, head):
 	data_json = json.dumps(data)
 	req = requests.post(url, headers = head, data = data_json)
@@ -197,5 +205,3 @@ while ((req.json())['lifeCycleState']) != 'available':
 	req = requests.get(surl, headers = head)
 
 create(fsid, url, data, head)
-
-

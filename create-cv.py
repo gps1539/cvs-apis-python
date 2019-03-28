@@ -34,10 +34,10 @@ else:
 
 if args.mountpoint:
 	if len(args.mountpoint)!=1:
-		print('a volume mountpoint is require')
+		print('a volume mountpoint is required')
 		sys.exit(1)
 else:
-	print('a volume mountpoint is require')
+	print('a volume mountpoint is required')
 	sys.exit(1)
 
 if args.allocation:
@@ -79,10 +79,10 @@ else:
 
 if args.region:
 	if (args.region)[0] != 'us-east-1' and (args.region)[0] != 'us-west-1' and (args.region)[0] != 'us-west-2' and (args.region)[0] != 'eu-central-1' and (args.region)[0] != 'eu-west1' and (args.region)[0] != 'eu-west-2' and (args.region)[0] != 'ap-northeast-1' and (args.region)[0] != 'ap-southeast-2':
-		print('Please select a supported region')
+		print('Please select an available region')
 		sys.exit(1)	
 else:
-	print('Please select a supported region')
+	print('Please select an available region')
 	sys.exit(1)
 
 if args.protocol:
@@ -139,15 +139,13 @@ url = url+command
 req = requests.get(url, headers = head)
 vols=(len(req.json()))
 
-#create volume
+# create volume
 def create(fsid, url, data, head):
 	data_json = json.dumps(data)
 	req = requests.post(url, headers = head, data = data_json)
 	details = json.dumps(req.json(), indent=4)
 	print('Created volume '+args.mountpoint[0])
 	print(highlight(details, JsonLexer(), TerminalFormatter()))
-
-
 
 data = {
 	"name": args.name[0],
@@ -161,5 +159,3 @@ data = {
 		}
 
 create(fsid, url, data, head)
-
-
