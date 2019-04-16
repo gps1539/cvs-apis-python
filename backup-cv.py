@@ -25,10 +25,10 @@ else:
 
 if args.mountpoint:
 	if len(args.mountpoint)!=1:
-		print('a volume mountpoint is required')
+		print('a volume mountpoint is require')
 		sys.exit(1)
 else:
-	print('a volume mountpoint is required')
+	print('a volume mountpoint is require')
 	sys.exit(1)
 
 conf=args.config[0]
@@ -68,19 +68,22 @@ if not fsid :
 
 now=(datetime.datetime.utcnow())
 
-# take a snapshot of volume
-def take_snap(fsid, url, data, head):
-	url = url+'/'+fsid+'/Snapshots'
+# adhoc backups are not working yet in the service
+# make a backup of volume
+def make_backup(fsid, url, data, head):
+	url = url+'/'+fsid+'/Backups'
 	data_json = json.dumps(data)
 	req = requests.post(url, headers = head, data = data_json)
 	details = json.dumps(req.json(), indent=4)
-	print('Created snapshot in volume '+args.mountpoint[0])
+	print('Created backup of volume '+args.mountpoint[0])
 	print(highlight(details, JsonLexer(), TerminalFormatter()))
 
 data = {
-	"name": "snap-"+str(now),
+	"name": "backup-"+str(now),
 	"fileSystemId": fsid,
 	"region": region
 		}
 
-take_snap(fsid, url, data, head)
+make_backup(fsid, url, data, head)
+
+

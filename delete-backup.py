@@ -5,7 +5,6 @@ import json
 import sys
 import re
 import argparse
-import datetime
 from pygments import highlight
 from pygments.lexers import JsonLexer
 from pygments.formatters import TerminalFormatter
@@ -13,6 +12,7 @@ from pygments.formatters import TerminalFormatter
 parser = argparse.ArgumentParser()
 parser.add_argument("-c","--config", nargs='+', help="config file")
 parser.add_argument("-m","--mountpoint", nargs='+', help="mountpoint")
+parser.add_argument("-b","--backup", nargs='+', help="backupId")
 args = parser.parse_args()
 
 if args.config:
@@ -29,6 +29,14 @@ if args.mountpoint:
 		sys.exit(1)
 else:
 	print('a volume mountpoint is required')
+	sys.exit(1)
+
+if args.backup:
+	if len(args.backup)!=1:
+		print('a backupID is required')
+		sys.exit(1)
+else:
+	print('a backupID is required')
 	sys.exit(1)
 
 conf=args.config[0]
@@ -61,26 +69,16 @@ vols=(len(req.json()))
 for vol in range(0, vols):
 	if ((req.json()[vol])['creationToken']) == args.mountpoint[0]:
 		fsid = ((req.json()[vol])['fileSystemId'])
-		region = ((req.json()[vol])['region'])
 if not fsid :
 	print('Mountpoint '+args.mountpoint[0] + ' does not exist')
 	sys.exit(1)
 
-now=(datetime.datetime.utcnow())
-
-# take a snapshot of volume
-def take_snap(fsid, url, data, head):
-	url = url+'/'+fsid+'/Snapshots'
-	data_json = json.dumps(data)
-	req = requests.post(url, headers = head, data = data_json)
+# delete backup
+def delete_backup(fsid, url, head):
+	url = url+'/'+fsid+'/Backups/'+args.backup[0]
+	req = requests.delete(url, headers = head)
 	details = json.dumps(req.json(), indent=4)
-	print('Created snapshot in volume '+args.mountpoint[0])
+	print('Deleting backup '+ args.backup[0])
 	print(highlight(details, JsonLexer(), TerminalFormatter()))
 
-data = {
-	"name": "snap-"+str(now),
-	"fileSystemId": fsid,
-	"region": region
-		}
-
-take_snap(fsid, url, data, head)
+delete_backup(fsid, url, head)
