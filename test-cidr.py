@@ -28,6 +28,10 @@ else:
 cidr = ipaddress.ip_network(args.cidr[0])
 if cidr.is_private == False or str(cidr) == '0.0.0.0/0':
 	print('Please enter a private (RFC1918) CIDR')
+	print()
+	print('The IP spaces for private internets are, 10.0.0.0-10.255.255.255, 172.16.0.0-172.31.255.255 and 192.168.0.0-192.168.255.255')
+	print()
+	print('Please see https://tools.ietf.org/html/rfc1918')
 	sys.exit(1)
 
 if args.keys:
