@@ -15,6 +15,7 @@ parser.add_argument("-c","--config", nargs='+', help="config file")
 parser.add_argument("-m","--mountpoint", nargs='+', help="mountpoint")
 parser.add_argument("-a","--allocation", type=int, help="allocated_size_in_GB (100 to 100000") 
 parser.add_argument("-l","--service_level", nargs='+', help="service level <standard|premium|extreme>")
+parser.add_argument("-t","--tag", nargs='+', help="tag (optional)")
 args = parser.parse_args()
 
 if args.config:
@@ -40,19 +41,17 @@ if args.allocation:
 	else:
 		args.allocation = args.allocation * 1000000000
 
-# word swap service levels to match UI
 if args.service_level:
 	if (args.service_level)[0] != 'standard' and (args.service_level)[0] != 'premium' and (args.service_level)[0] != 'extreme':
 		print('Service level must be standard, premium or extreme')
 		sys.exit(1)
-	else:
-		if (args.service_level)[0] == 'standard':
-			(args.service_level)[0] = 'basic'
-		elif (args.service_level)[0] == 'premium':
-			(args.service_level)[0] = 'standard'
 else:
 		print('Service level must be standard, premium or extreme')
 		sys.exit(1)
+
+tag = ''
+if args.tag:
+	tag = args.tag[0]
 
 conf=args.config[0]
 file = open(conf, 'r')
@@ -104,7 +103,8 @@ data = {
 	"creationToken": args.mountpoint[0],
 	"region": region,
 	"serviceLevel": args.service_level[0],
-	"quotaInBytes": args.allocation
+	"quotaInBytes": args.allocation,
+	"labels": [tag]
 		}
 
 update(fsid, url, data, head)

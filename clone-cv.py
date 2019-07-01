@@ -33,6 +33,22 @@ else:
 	print('a config file is required')
 	sys.exit(1)
 
+if args.name:
+	if len(args.name)!=1:
+		print('a name is required')
+		sys.exit(1)
+else:
+	print('a name is required')
+	sys.exit(1)
+
+if args.service_level:
+	if len(args.service_level)!=1:
+		print('a service level is required')
+		sys.exit(1)
+else:
+	print('a service level is required')
+	sys.exit(1)
+
 if args.mountpoint:
 	if len(args.mountpoint)!=1:
 		print('a parent mountpoint is required')
