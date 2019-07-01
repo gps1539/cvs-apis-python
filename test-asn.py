@@ -12,18 +12,18 @@ Version 0.3
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-a","--asn", nargs='+', help="an ASN is required")
-parser.add_argument("-d","--details", help="list gateway details",action="store_true")
-parser.add_argument("-k","--keys", nargs=2, help="access and secret keys. Optional will use credentials file if not specified here")
+parser.add_argument("-d","--details", help="Optional, list gateway details",action="store_true")
+parser.add_argument("-k","--keys", nargs=2, help="access and secret keys. Optional, will use credentials file if not specified here")
 args = parser.parse_args()
 
 if args.asn:
 	if len(args.asn)!=1:
 		print('an ASN is required')
-		parser.print_usage()
+		parser.print_help()
 		sys.exit(1)
 else:
 	print('an ASN is required')
-	parser.print_usage()
+	parser.print_help()
 	sys.exit(1)
 
 asn = args.asn[0]

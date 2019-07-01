@@ -12,17 +12,17 @@ Version 0.3
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c","--cidr", nargs='+', help="a private (RFC1918) /28 CIDR is required")
-parser.add_argument("-k","--keys", nargs=2, help="access and secret keys, Optional will use credentials file if not specified here")
+parser.add_argument("-k","--keys", nargs=2, help="access and secret keys. Optional, will use credentials file if not specified here")
 args = parser.parse_args()
 
 if args.cidr:
 	if len(args.cidr)!=1:
 		print('an CIDR is required')
-		parser.print_usage()
+		parser.print_help()
 		sys.exit(1)
 else:
 	print('an CIDR is required')
-	parser.print_usage()
+	parser.print_help()
 	sys.exit(1)
 
 cidr = ipaddress.ip_network(args.cidr[0])
@@ -69,7 +69,7 @@ for region in regions:
 			print(str(cidr)+' overlaps with ' + (str(p)) + ' in region ' + (str(region)))
 			clashes += 1
 
-# Report number of clashes
+# Report clashes
 if clashes == 0:
 	print(str(cidr) + ' does not overlap existing CIDRs in your account')
 else:
