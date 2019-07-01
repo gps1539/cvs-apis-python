@@ -20,17 +20,17 @@ if args.config:
 		print('a path to the config file(s) is required')
 		sys.exit(1)
 else:
-	print('a path to the config file(s) is required')
+	parser.print_help()	
 	sys.exit(1)
 
 if args.output:
 	if len(args.config)!=1:
-		print('file name for output file required')
+		print('the name of output file is required')
 		sys.exit(1)
 	else:
 		output = args.output[0]
 else:
-	print('file name for output file required')
+	parser.print_help()
 	sys.exit(1)
 
 standard={}
@@ -80,11 +80,11 @@ def config(file):
 		if ((req.json()[vol])['serviceLevel']) == 'extreme':
 			extreme.update({mountpoint:allocated})
 			used_extreme.update({mountpoint:used})
-		if ((req.json()[vol])['serviceLevel']) == 'standard':
+		if ((req.json()[vol])['serviceLevel']) == 'premium':
 			premium.update({mountpoint:allocated})
 			used_premium.update({mountpoint:used})
 			service_level='premium'
-		if ((req.json()[vol])['serviceLevel']) == 'basic':
+		if ((req.json()[vol])['serviceLevel']) == 'standard':
 			standard.update({mountpoint:allocated})
 			used_standard.update({mountpoint:used})
 			service_level='standard'
