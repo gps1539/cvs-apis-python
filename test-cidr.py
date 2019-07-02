@@ -7,12 +7,14 @@ import ipaddress
 ''' 
 Written by Graham Smith, NetApp June 2019
 Checks if a CIDR is private and if it overlaps an existing CIDR in an AWS account
-Version 0.3
+Version 0.4
 ''' 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c","--cidr", nargs='+', help="a private (RFC1918) /28 CIDR is required")
-parser.add_argument("-k","--keys", nargs=2, help="access and secret keys. Optional, will use credentials file if not specified here")
+required = parser.add_argument_group('Required')
+optional = parser.add_argument_group('Optional')
+required.add_argument("-c","--cidr", nargs='+', help="a private (RFC1918) /28 CIDR is required")
+optional.add_argument("-k","--keys", nargs=2, help="Access key, then Secret key. Optional, will use credentials file if not specified here")
 args = parser.parse_args()
 
 if args.cidr:
