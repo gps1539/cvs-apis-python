@@ -13,7 +13,7 @@ Version 0.4
 parser = argparse.ArgumentParser()
 required = parser.add_argument_group('Required')
 optional = parser.add_argument_group('Optional')
-required.add_argument("-c","--cidr", nargs='+', help="a private (RFC1918) /28 CIDR is required", required=True)
+required.add_argument("-c","--cidr", nargs='+', help="a private (RFC1918) /28 CIDR is required")
 optional.add_argument("-k","--keys", nargs=2, help="Access key, then Secret key. Optional, will use credentials file if not specified here")
 args = parser.parse_args()
 
