@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser()
 required = parser.add_argument_group('Required')
 optional = parser.add_argument_group('Optional')
 required.add_argument("-c","--config", nargs='+', help="config file")
-required.add_argument("-D","--DNS", nargs='+', help="IP or FQDN for AD DNS")
+required.add_argument("-D","--DNS", nargs='+', help="IP for AD DNS")
 required.add_argument("-d","--domain", nargs='+', help="domain for AD") 
 required.add_argument("-n","--netbios", nargs='+', help="netBIOS name for the CVS SMB server")
 optional.add_argument("-ou","--organizationalUnit", nargs='+', help="OU required, defaults to CN=Computers")
@@ -34,10 +34,10 @@ else:
 
 if args.DNS:
 	if len(args.DNS)!=1:
-		print('a IP or FQDN for DNS is required')
+		print('a IP address for DNS is required')
 		sys.exit(1)
 else:
-	print('a IP or FQDN for DNS is required')
+	print('a IP address for DNS is required')
 	sys.exit(1)
 
 if args.domain:
