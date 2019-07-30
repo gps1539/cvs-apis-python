@@ -2,6 +2,7 @@
 import requests
 import json
 import argparse
+import sys
 from pygments import highlight
 from pygments.lexers import JsonLexer
 from pygments.formatters import TerminalFormatter
