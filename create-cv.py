@@ -21,6 +21,7 @@ parser.add_argument("-e","--export", nargs='+', help="provide valid CIDR for exp
 parser.add_argument("-w","--rw_ro", nargs='+', help="rw or ro")
 parser.add_argument("-p","--protocol", nargs='+', help="<nfs3|smb|nfs3smb>")
 parser.add_argument("-s","--snapshot", nargs='+', help="snapshotId (optional)")
+parser.add_argument("-sd","--snapshot_directory", nargs='+', help="<hide|show>")
 parser.add_argument("-t","--tag", nargs='+', help="tag (optional)")
 args = parser.parse_args()
 
@@ -55,6 +56,18 @@ if args.service_level:
 else:
 		print('Service level must be standard, premium or extreme')
 		sys.exit(1)
+
+if args.snapshot_directory:
+	if (args.snapshot_directory)[0] == 'hide':
+		snapshot_directory = False
+	elif (args.snapshot_directory)[0] == 'show':
+		snapshot_directory = True
+	else:
+		print('snapshot_directory argument must be hide or show')
+		sys.exit(1)
+
+else:
+	snapshot_directory = True
 
 # set export to default
 export = '0.0.0.0/0'
@@ -153,6 +166,7 @@ data = {
 	"quotaInBytes": args.allocation,
 	"exportPolicy": rule,
 	"snapshotId": snapshot,
+	"snapshotDirectory": snapshot_directory,
 	"labels": [tag]
 		}
 

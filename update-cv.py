@@ -15,6 +15,7 @@ parser.add_argument("-c","--config", nargs='+', help="config file")
 parser.add_argument("-m","--mountpoint", nargs='+', help="mountpoint")
 parser.add_argument("-a","--allocation", type=int, help="allocated_size_in_GB (100 to 100000") 
 parser.add_argument("-l","--service_level", nargs='+', help="service level <standard|premium|extreme>")
+parser.add_argument("-sd","--snapshot_directory", nargs='+', help="<hide|show>")
 parser.add_argument("-t","--tag", nargs='+', help="tag (optional)")
 args = parser.parse_args()
 
@@ -48,6 +49,18 @@ if args.service_level:
 else:
 		print('Service level must be standard, premium or extreme')
 		sys.exit(1)
+
+if args.snapshot_directory:
+	if (args.snapshot_directory)[0] == 'hide':
+		snapshot_directory = False
+	elif (args.snapshot_directory)[0] == 'show':
+		snapshot_directory = True
+	else:
+		print('snapshot_directory argument must be hide or show')
+		sys.exit(1)
+
+else:
+	snapshot_directory = True
 
 tag = ''
 if args.tag:
@@ -104,6 +117,7 @@ data = {
 	"region": region,
 	"serviceLevel": args.service_level[0],
 	"quotaInBytes": args.allocation,
+	"snapshotDirectory": snapshot_directory,
 	"labels": [tag]
 		}
 
