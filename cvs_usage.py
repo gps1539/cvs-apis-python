@@ -24,7 +24,7 @@ else:
 	sys.exit(1)
 
 if args.output:
-	if len(args.config)!=1:
+	if len(args.output)!=1:
 		print('the name of output file is required')
 		sys.exit(1)
 	else:

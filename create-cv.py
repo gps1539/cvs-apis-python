@@ -19,7 +19,7 @@ parser.add_argument("-a","--allocation", type=int, help="allocated_size_in_GB (1
 parser.add_argument("-l","--service_level", nargs='+', help="service level <standard|premium|extreme>")
 parser.add_argument("-e","--export", nargs='+', help="provide valid CIDR for export, defaults to 0.0.0.0/0")
 parser.add_argument("-w","--rw_ro", nargs='+', help="rw or ro")
-parser.add_argument("-p","--protocol", nargs='+', help="<nfs3|smb|nfs3smb>")
+parser.add_argument("-p","--protocol", nargs='+', help="<nfs3|nfs41|nfs3+41|smb|nfs3+smb|nfs41+smb|nfs3+41+smb>")
 parser.add_argument("-s","--snapshot", nargs='+', help="snapshotId (optional)")
 parser.add_argument("-sd","--snapshot_directory", nargs='+', help="<hide|show>")
 parser.add_argument("-t","--tag", nargs='+', help="tag (optional)")
@@ -97,25 +97,30 @@ else:
 	sys.exit(1)
 
 if args.protocol:
-	if (args.protocol)[0] != 'nfs3' and (args.protocol)[0] !='smb' and (args.protocol)[0] != 'nfs3smb' :
-		print('Please choose nfs3, smb or nfs3smb (dual)')
+	if (args.protocol)[0] != 'nfs3' and (args.protocol)[0] !='nfs41' and (args.protocol)[0] !='nfs3+41' and (args.protocol)[0] !='smb' and (args.protocol)[0] != 'nfs3+smb' and (args.protocol)[0] != 'nfs41+smb' and (args.protocol)[0] != 'nfs3+41+smb':
+		print('Please choose nfs3, nfs41, nfs3+41, smb, nfs3+smb, nfs41+smb, nfs3+41+smb')
 		sys.exit(1)
 	elif (args.protocol)[0] == 'nfs3':
-		nfs3 = True
-		cifs = False
-		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": False }]}
+		nfs3, nfs41, cifs = True, False, False
+		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
+	elif (args.protocol)[0] == 'nfs41':
+		nfs3, nfs41, cifs = False, True, False
+		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
+	elif (args.protocol)[0] == 'nfs3+41':
+		nfs3, nfs41, cifs = True, True, False
+		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
 	elif (args.protocol)[0] == 'smb':
-		nfs3 = False 
-		cifs = True
+		nfs3, nfs41, cifs = False, False, True
 		rule = {"rules": []}
+	elif (args.protocol)[0] == 'nfs3+smb':
+		nfs3, nfs41, cifs = True, False, True
+		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
+	elif (args.protocol)[0] == 'nfs41+smb':
+		nfs3, nfs41, cifs = False, True, True
+		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
 	else:
-		nfs3 = True 
-		cifs = True
-		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": False }]}
-
-else:
-	print('Please choose nfs3, smb or nfs3smb (dual)')
-	sys.exit(1)
+		nfs3, nfs41, cifs = True, True, True
+		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
 
 snapshot = ''
 if args.snapshot:
@@ -155,7 +160,7 @@ def create(fsid, url, data, head):
 	data_json = json.dumps(data)
 	req = requests.post(url, headers = head, data = data_json)
 	details = json.dumps(req.json(), indent=4)
-	print('Created volume '+args.mountpoint[0])
+	print('Creating volume '+args.mountpoint[0])
 	print(highlight(details, JsonLexer(), TerminalFormatter()))
 
 data = {
