@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import requests
-import urllib.request
 import json
 import sys
 import re
@@ -17,9 +16,7 @@ parser.add_argument("-m","--mountpoint", nargs='+', help="mountpoint")
 parser.add_argument("-r","--region", nargs='+', help="region")
 parser.add_argument("-a","--allocation", type=int, help="allocated_size_in_GB (100 to 100000") 
 parser.add_argument("-l","--service_level", nargs='+', help="service level <standard|premium|extreme>")
-parser.add_argument("-e","--export", nargs='+', help="provide valid CIDR for export, defaults to 0.0.0.0/0")
-parser.add_argument("-w","--rw_ro", nargs='+', help="rw or ro")
-parser.add_argument("-p","--protocol", nargs='+', help="<nfs3|nfs41|nfs3+41|smb|nfs3+smb|nfs41+smb|nfs3+41+smb>")
+parser.add_argument("-e","--export", action='append', nargs='+', help="protocol <nfs3|nfs41|nfs3+41|smb|nfs3+smb|nfs41+smb|nfs3+41+smb> and for nfs3|41 a valid CIDR and rw|ro")
 parser.add_argument("-s","--snapshot", nargs='+', help="snapshotId (optional)")
 parser.add_argument("-sd","--snapshot_directory", nargs='+', help="<hide|show>")
 parser.add_argument("-t","--tag", nargs='+', help="tag (optional)")
@@ -48,7 +45,6 @@ if args.allocation:
 	else:
 		args.allocation = args.allocation * 1000000000
 
-# check service level and word swap to match UI
 if args.service_level:
 	if (args.service_level)[0] != 'standard' and (args.service_level)[0] != 'premium' and (args.service_level)[0] != 'extreme':
 		print('Service level must be standard, premium or extreme')
@@ -70,23 +66,8 @@ else:
 	snapshot_directory = True
 
 # set export to default
-export = '0.0.0.0/0'
-if args.export:
-	export = args.export[0]
-
-if args.rw_ro:
-	if (args.rw_ro)[0] != 'ro' and (args.rw_ro)[0] != 'rw':
-		print('ro (read only) or rw (read write) must be provided')
-		sys.exit(1)
-	elif (args.rw_ro)[0] == 'ro':
-		ro = True
-		rw = False
-	else:
-		ro = False
-		rw = True
-else:
-	print('ro (read only) or rw (read write) must be provided')
-	sys.exit(1)
+#export = '0.0.0.0/0'
+#rw, ro = True, False
 
 if args.region:
 	if (args.region)[0] != 'us-east-1' and (args.region)[0] != 'us-west-1' and (args.region)[0] != 'us-west-2' and (args.region)[0] != 'eu-central-1' and (args.region)[0] != 'eu-west-1' and (args.region)[0] != 'eu-west-2' and (args.region)[0] != 'ap-northeast-1' and (args.region)[0] != 'ap-southeast-2':
@@ -95,32 +76,6 @@ if args.region:
 else:
 	print('Please select an available region')
 	sys.exit(1)
-
-if args.protocol:
-	if (args.protocol)[0] != 'nfs3' and (args.protocol)[0] !='nfs41' and (args.protocol)[0] !='nfs3+41' and (args.protocol)[0] !='smb' and (args.protocol)[0] != 'nfs3+smb' and (args.protocol)[0] != 'nfs41+smb' and (args.protocol)[0] != 'nfs3+41+smb':
-		print('Please choose nfs3, nfs41, nfs3+41, smb, nfs3+smb, nfs41+smb, nfs3+41+smb')
-		sys.exit(1)
-	elif (args.protocol)[0] == 'nfs3':
-		nfs3, nfs41, cifs = True, False, False
-		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
-	elif (args.protocol)[0] == 'nfs41':
-		nfs3, nfs41, cifs = False, True, False
-		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
-	elif (args.protocol)[0] == 'nfs3+41':
-		nfs3, nfs41, cifs = True, True, False
-		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
-	elif (args.protocol)[0] == 'smb':
-		nfs3, nfs41, cifs = False, False, True
-		rule = {"rules": []}
-	elif (args.protocol)[0] == 'nfs3+smb':
-		nfs3, nfs41, cifs = True, False, True
-		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
-	elif (args.protocol)[0] == 'nfs41+smb':
-		nfs3, nfs41, cifs = False, True, True
-		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
-	else:
-		nfs3, nfs41, cifs = True, True, True
-		rule = {"rules": [{"ruleIndex": 1,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41 }]}
 
 snapshot = ''
 if args.snapshot:
@@ -163,16 +118,73 @@ def create(fsid, url, data, head):
 	print('Creating volume '+args.mountpoint[0])
 	print(highlight(details, JsonLexer(), TerminalFormatter()))
 
-data = {
-	"name": args.name[0],
-	"creationToken": args.mountpoint[0],
-	"region": args.region[0],
-	"serviceLevel": args.service_level[0],
-	"quotaInBytes": args.allocation,
-	"exportPolicy": rule,
-	"snapshotId": snapshot,
-	"snapshotDirectory": snapshot_directory,
-	"labels": [tag]
-		}
+if args.export:
+	rule=[]
+	nfs3, nfs41, cifs = True, False, False
 
-create(fsid, url, data, head)
+	for r in range (0, len(args.export)):
+		if (args.export[r][0]) == 'smb':
+			rules = {"rules": []}
+			data = {
+				"name": args.name[0],
+				"creationToken": args.mountpoint[0],
+				"region": args.region[0],
+				"serviceLevel": args.service_level[0],
+				"quotaInBytes": args.allocation,
+				"exportPolicy": rules,
+				"snapshotId": snapshot,
+				"snapshotDirectory": snapshot_directory,
+				"labels": [tag]
+				}
+			create(fsid, url, data, head)
+			sys.exit(1)
+	
+	for r in range (0, len(args.export)):
+		if (args.export[r][0]) != 'nfs3' and (args.export[r][0]) !='nfs41' and (args.export[r][0]) !='nfs3+41' and (args.export[r][0]) !='smb' and (args.export[r][0]) != 'nfs3+smb' and (args.export[r][0]) != 'nfs41+smb' and (args.export[r][0]) != 'nfs3+41+smb':
+			print('First argument should be nfs3, nfs41, nfs3+41, smb, nfs3+smb, nfs41+smb or nfs3+41+smb')
+			sys.exit(1)
+		if (len(args.export[r])) < 3:
+			print('For nfs please provide a CIDR and rw|ro')
+			sys,exit(1)
+		if (args.export[r][0]) == 'nfs3':
+			nfs3, nfs41, cifs = True, False, False
+		elif (args.export[r][0]) == 'nfs41':
+			nfs3, nfs41, cifs = False, True, False
+		elif (args.export[r][0]) == 'nfs3+41':
+			nfs3, nfs41, cifs = True, True, False
+		elif (args.export[r][0]) == 'nfs3+smb':
+			nfs3, nfs41, cifs = True, False, True
+		elif (args.export[r][0]) == 'nfs41+smb':
+			nfs3, nfs41, cifs = False, True, True
+		else :
+			nfs3, nfs41, cifs = True, True, True
+		export = (args.export[r][1])
+		if (args.export[r][2]) != 'ro' and (args.export[r][2]) != 'rw':
+			print('ro (read only) or rw (read write) must be provided')
+			sys.exit(1)
+		elif (args.export[r][2]) == 'ro':
+			rw, ro = False, True
+		else: 
+			rw, ro = True, False
+		rule_index=r+1
+		index = {"ruleIndex": rule_index,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41,}
+		rule.append(index)
+		rules = {"rules": rule}
+
+	data = {
+		"name": args.name[0],
+		"creationToken": args.mountpoint[0],
+		"region": args.region[0],
+		"serviceLevel": args.service_level[0],
+		"quotaInBytes": args.allocation,
+		"exportPolicy": rules,
+		"snapshotId": snapshot,
+		"snapshotDirectory": snapshot_directory,
+		"labels": [tag]
+		}
+	create(fsid, url, data, head)
+	sys.exit(1)
+
+else:
+	print("The --export -e argument is required")
+	sys.exit(1)
