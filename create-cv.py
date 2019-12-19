@@ -2,9 +2,7 @@
 import requests
 import json
 import sys
-import re
 import argparse
-import datetime
 from pygments import highlight
 from pygments.lexers import JsonLexer
 from pygments.formatters import TerminalFormatter
@@ -18,7 +16,7 @@ parser.add_argument("-a","--allocation", type=int, help="allocated_size_in_GB (1
 parser.add_argument("-l","--service_level", nargs='+', help="service level <standard|premium|extreme>")
 parser.add_argument("-e","--export", action='append', nargs='+', help="protocol <nfs3|nfs41|nfs3+41|smb|nfs3+smb|nfs41+smb|nfs3+41+smb> and for nfs3|41 a valid CIDR and rw|ro")
 parser.add_argument("-s","--snapshot", nargs='+', help="snapshotId (optional)")
-parser.add_argument("-sd","--snapshot_directory", nargs='+', help="<hide|show>")
+parser.add_argument("-hs","--hide_snapshot", action='store_true', help="hide the snapshot directory")
 parser.add_argument("-t","--tag", nargs='+', help="tag (optional)")
 args = parser.parse_args()
 
@@ -53,21 +51,10 @@ else:
 		print('Service level must be standard, premium or extreme')
 		sys.exit(1)
 
-if args.snapshot_directory:
-	if (args.snapshot_directory)[0] == 'hide':
-		snapshot_directory = False
-	elif (args.snapshot_directory)[0] == 'show':
-		snapshot_directory = True
-	else:
-		print('snapshot_directory argument must be hide or show')
-		sys.exit(1)
-
+if args.hide_snapshot:
+	snapshot_directory = False
 else:
 	snapshot_directory = True
-
-# set export to default
-#export = '0.0.0.0/0'
-#rw, ro = True, False
 
 if args.region:
 	if (args.region)[0] != 'us-east-1' and (args.region)[0] != 'us-west-1' and (args.region)[0] != 'us-west-2' and (args.region)[0] != 'eu-central-1' and (args.region)[0] != 'eu-west-1' and (args.region)[0] != 'eu-west-2' and (args.region)[0] != 'ap-northeast-1' and (args.region)[0] != 'ap-southeast-2':
@@ -120,7 +107,6 @@ def create(fsid, url, data, head):
 
 if args.export:
 	rule=[]
-	nfs3, nfs41, cifs = True, False, False
 
 	for r in range (0, len(args.export)):
 		if (args.export[r][0]) == 'smb':
@@ -143,6 +129,7 @@ if args.export:
 		if (args.export[r][0]) != 'nfs3' and (args.export[r][0]) !='nfs41' and (args.export[r][0]) !='nfs3+41' and (args.export[r][0]) !='smb' and (args.export[r][0]) != 'nfs3+smb' and (args.export[r][0]) != 'nfs41+smb' and (args.export[r][0]) != 'nfs3+41+smb':
 			print('First argument should be nfs3, nfs41, nfs3+41, smb, nfs3+smb, nfs41+smb or nfs3+41+smb')
 			sys.exit(1)
+
 		if (len(args.export[r])) < 3:
 			print('For nfs please provide a CIDR and rw|ro')
 			sys,exit(1)
@@ -167,7 +154,7 @@ if args.export:
 		else: 
 			rw, ro = True, False
 		rule_index=r+1
-		index = {"ruleIndex": rule_index,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41,}
+		index = {"ruleIndex": rule_index,"allowedClients": export,"unixReadOnly": ro,"unixReadWrite": rw,"cifs": cifs,"nfsv3": nfs3,"nfsv4": nfs41}
 		rule.append(index)
 		rules = {"rules": rule}
 
