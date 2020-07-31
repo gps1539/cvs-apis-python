@@ -32,7 +32,7 @@ else:
 
 conf=args.config[0]
 file = open(conf, 'r')
-fsid = False
+volid = False
 
 # read config files for keys and api endpoint
 for line in file:
@@ -42,6 +42,7 @@ for line in file:
 		secretkey=(line.split("=")[1].rstrip('\n'))
 	if 'url' in line:
 		url=str(line.split("=")[1].rstrip('\n'))
+		url=(url.replace("v1", "v2"))
 
 standard_qos = 16
 premium_qos = 64
@@ -52,24 +53,25 @@ head['api-key'] = apikey
 head['secret-key'] = secretkey
 head['content-type'] = 'application/json'
 
-command = 'FileSystems'
+command = 'Volumes'
 url = url+command
 
-# get filesystems
+# get Volumes
 req = requests.get(url, headers = head)
 vols=(len(req.json()))
 
-# search for filesystemId
+# search for VolumeId
 for vol in range(0, vols):
 	if ((req.json()[vol])['creationToken']) == args.mountpoint[0]:
-		fsid = ((req.json()[vol])['fileSystemId'])
-if not fsid :
-	print('Mountpoint '+ args.mountpoint[0] + ' does not exist')
+		volid = ((req.json()[vol])['volumeId'])
+		region = ((req.json()[vol])['region'])
+if not volid :
+	print('Mountpoint '+args.mountpoint[0] + ' does not exist')
 	sys.exit(1)
 
 # get volume details
-def getqos(fsid, url, head):
-	url = url+'/'+fsid
+def getqos(volid, url, head):
+	url = url+'/'+volid
 	req = requests.get(url, headers = head)
 	service_level=(req.json()['serviceLevel'])
 	allocated=((req.json()['quotaInBytes'])/1000000000000)
@@ -86,4 +88,4 @@ def getqos(fsid, url, head):
 		qos = (standard_qos * allocated)
 		print('QoS throughput policy = 0-' + str(round(qos,4)) + ' MB/s')
 
-getqos(fsid, url, head)
+getqos(volid, url, head)

@@ -6,9 +6,9 @@ import sys
 import os
 import csv
 import datetime
-from pygments import highlight
-from pygments.lexers import JsonLexer
-from pygments.formatters import TerminalFormatter
+#from pygments import highlight
+#from pygments.lexers import JsonLexer
+#from pygments.formatters import TerminalFormatter
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c","--config", nargs='+', help="path to .conf config files")
